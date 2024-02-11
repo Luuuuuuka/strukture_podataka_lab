@@ -1,0 +1,206 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+struct _student;
+typedef struct _student* StudentP;
+typedef struct _student {
+	char firstName[32];
+	char lastName[32];
+	int idNumber;
+	int grade;
+	StudentP Next;
+} Student;
+
+int InitializeHead(StudentP Head);
+int AddStudent(StudentP P, char Name[32], char Surname[32], int ID);
+int PrintList(StudentP P);
+int AddGradetoStudent(StudentP P, int ID, int Grade);
+int	DeleteName(StudentP P, char Name[32]);
+int CreateListStudentsPassed(StudentP P, StudentP NewHead);
+
+
+int main(){
+    char Name_to_delete[32];
+	char Name[32];
+	char Surname[32];
+	strcpy(Name, "");
+	strcpy(Surname, "");
+	int ID = 0;
+	int Grade = 0;
+	StudentP Head = NULL;
+	StudentP NewHead = NULL;
+
+	Head = (StudentP)malloc(sizeof(Student));
+	if (Head == NULL) {
+		printf("ERROR! Memory allocation failed.");
+		return -1;
+	}
+
+	NewHead = (StudentP)malloc(sizeof(Student));
+	if (NewHead == NULL) {
+		printf("ERROR! Memory allocation failed.");
+		return -1;
+	}
+
+	FILE* fp1 = NULL;
+	fp1 = fopen("studenti.txt", "r");
+	if (fp1 == NULL) {
+		printf("ERROR! File failed to load.");
+		return -1;
+	}
+
+	FILE* fp2 = NULL;
+	fp2 = fopen("predmet1.txt", "r");
+	if (fp2 == NULL) {
+		printf("ERROR! File failed to load.");
+		return -1;
+	}
+
+	InitializeHead(Head);
+
+	while (!feof(fp1)) {
+		fscanf(fp1, "%s %s %d", Surname, Name, &ID);
+			
+		AddStudent(Head, Name, Surname, ID);
+	}
+
+	fclose(fp1);
+
+	while (!feof(fp2)) {
+		fscanf(fp2, "%d %d", &ID, &Grade);
+
+		AddGradetoStudent(Head->Next, ID, Grade);
+	}
+
+	fclose(fp2);
+
+	PrintList(Head->Next);
+
+    printf("\nWrite the name of the person you want to delete: ");
+    scanf("%s", Name_to_delete);
+    
+    printf("\n\n");
+	
+	DeleteName(Head, Name_to_delete);
+
+	PrintList(Head->Next);
+	
+	CreateListStudentsPassed(Head, NewHead);
+
+    printf("\nList of those who didnt pass\n");
+	PrintList(Head->Next);
+    printf("\nList of those who did pass\n");
+	PrintList(NewHead->Next);
+
+    free(Head);
+    free(NewHead);
+
+    return 0;
+}
+
+int InitializeHead(StudentP Head) {
+	strcpy(Head->firstName, "");
+	strcpy(Head->lastName, "");
+	Head->idNumber = 0;
+	Head->grade = 0;
+	Head->Next = NULL;
+
+	return 0;
+}
+
+int AddStudent(StudentP P, char Name[32], char Surname[32], int ID) {
+	StudentP Q;
+
+	Q = (StudentP)malloc(sizeof(Student));
+	if (Q == NULL) {
+		printf("ERROR! Memory allocation failed.");
+		return -1;
+	}
+
+	strcpy(Q->firstName, Name);
+	strcpy(Q->lastName, Surname);
+	Q->idNumber = ID;
+	Q->grade = 0;
+
+    //while (P->Next != NULL && strcmp(strcat(strcat(P->Next->lastName," "),P->Next->firstName), strcat(strcat(Q->lastName," "),Q->firstName)) < 0)
+	while (P->Next != NULL && strcmp(P->Next->lastName, Q->lastName) < 0)
+		P = P->Next;
+
+	Q->Next = P->Next;
+	P->Next = Q;
+
+	return 0;
+}
+
+int AddGradetoStudent(StudentP P, int ID, int Grade) {
+	while (P->Next != NULL && P->idNumber != ID)
+		P = P->Next;
+    
+    if(P->idNumber == ID)
+	    P->grade = Grade;
+	
+	return 0;
+}
+
+//Salji Head->Next za P
+int PrintList(StudentP P) {
+	if (P == NULL)
+		printf("Lista je prazna");
+
+	else
+		while (P->Next != NULL) {
+			printf("%s %s id:%d grade:%d\n", P->lastName, P->firstName, P->idNumber, P->grade);
+
+			P = P->Next;
+		}
+
+
+	return 0;
+}
+
+int	DeleteName(StudentP P, char Name[32]) {
+    StudentP temp, prev;
+
+    prev = P;
+    P = P->Next;
+    
+    while(P->Next != NULL) {
+        if (strcmp(P->firstName, Name) == 0) {
+            temp = P;
+            prev->Next = temp->Next;
+            P = P->Next;
+            free(temp);
+        }
+        else {
+            prev = P;
+            P = P->Next;
+    
+        }    
+    }
+    return 0;
+}
+
+int CreateListStudentsPassed(StudentP P, StudentP NewHead) {
+    StudentP prev;
+    
+    prev = P;
+    P = P->Next;
+    
+    while(P->Next != NULL) {
+        if (P->grade > 1) {
+            prev->Next = P->Next;
+            P->Next = NewHead->Next;
+            NewHead->Next = P;  
+            NewHead = NewHead->Next;
+            P = prev->Next;
+        }
+        else {
+            prev = P;
+            P = P->Next;
+        }
+    }
+        
+    
+    return 0;
+}
