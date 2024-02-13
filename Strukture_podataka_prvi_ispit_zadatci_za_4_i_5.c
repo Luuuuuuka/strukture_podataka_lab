@@ -1,3 +1,5 @@
+#define _CRT_SECURE_NO_WARNINGS
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -8,17 +10,17 @@ typedef struct _student *StudentP;
 typedef struct _subject *SubjectP;
 
 typedef struct _student {
-    char firstName[32];
-    char lastName[32];
-    int idNumber;
-    StudentP Next;
-    SubjectP Child;
+	char firstName[32];
+	char lastName[32];
+	int idNumber;
+	StudentP Next;
+	SubjectP Child;
 } Student;
 
 typedef struct _subject {
-    char subjectName[32];
-    int grade;
-    SubjectP Next;
+	char subjectName[32];
+	int grade;
+	SubjectP Next;
 } Subject;
 
 int InitializeHead(StudentP Head);
@@ -72,7 +74,7 @@ int main()
 		printf("ERROR! File predmet2.txt failed to load.");
 		return -1;
 	}
-	
+
 	FILE* fp4 = NULL;
 	fp4 = fopen("predmet3.txt", "r");
 	if (fp4 == NULL) {
@@ -80,65 +82,68 @@ int main()
 		return -1;
 	}
 
-    InitializeHead(Head);
+	InitializeHead(Head);
 
-    while(!feof(fp1)) {
-        fscanf(fp1, "%s %s %d", Surname, Name, &ID);
-        
-        AddStudent(Head, Name, Surname, ID);
-    }
+	while (!feof(fp1)) {
+		fscanf(fp1, "%s %s %d", Surname, Name, &ID);
 
-    fclose(fp1);
+		AddStudent(Head, Name, Surname, ID);
+	}
 
-    fscanf(fp2, "%s", SubjectName);
+	fclose(fp1);
 
-    while(!feof(fp2)) {
-        fscanf(fp2, "%d %d", &ID, &Grade);
-        
-        AddGrades(Head, ID, Grade, SubjectName);
-    }
+	fscanf(fp2, "%s", SubjectName);
 
-    fclose(fp2);
+	while (!feof(fp2)) {
+		fscanf(fp2, "%d %d", &ID, &Grade);
 
-    fscanf(fp3, "%s", SubjectName);
+		AddGrades(Head, ID, Grade, SubjectName);
+	}
 
-    while(!feof(fp3)) {
-        fscanf(fp3, "%d %d", &ID, &Grade);
-        
-        AddGrades(Head, ID, Grade, SubjectName);
-    }
+	fclose(fp2);
 
-    fclose(fp3);
+	fscanf(fp3, "%s", SubjectName);
 
-    fscanf(fp4, "%s", SubjectName);
+	while (!feof(fp3)) {
+		fscanf(fp3, "%d %d", &ID, &Grade);
 
-    while(!feof(fp4)) {
-        fscanf(fp4, "%d %d", &ID, &Grade);
-        
-        AddGrades(Head, ID, Grade, SubjectName);
-    }
+		AddGrades(Head, ID, Grade, SubjectName);
+	}
 
-    fclose(fp4);
+	fclose(fp3);
 
-    PrintList(Head->Next);
-    
-    CreateListPassedAllThree(Head, NewHead);
-    
-    printf("\nList of those who didnt pass\n");
-    PrintList(Head->Next);
-    
-    printf("\nList of those who did pass\n");
-    PrintList(NewHead->Next);
+	fscanf(fp4, "%s", SubjectName);
 
-    return 0;
+	while (!feof(fp4)) {
+		fscanf(fp4, "%d %d", &ID, &Grade);
+
+		AddGrades(Head, ID, Grade, SubjectName);
+	}
+
+	fclose(fp4);
+
+	printf("\nList of students with grades\n");
+	PrintList(Head->Next);
+
+	CreateListPassedAllThree(Head, NewHead);
+
+	printf("\nList of those who didnt pass all three\n");
+	PrintList(Head->Next);
+
+	printf("\nList of those who did pass all three\n");
+	PrintList(NewHead->Next);
+
+	return 0;
 }
 
 int InitializeHead(StudentP Head) {
-    strcpy(Head->firstName, "");
-    strcpy(Head->lastName, "");
-    Head->idNumber = 0;
-    Head->Next = NULL;
-    Head->Child = NULL;
+	strcpy(Head->firstName, "");
+	strcpy(Head->lastName, "");
+	Head->idNumber = 0;
+	Head->Next = NULL;
+	Head->Child = NULL;
+
+	return 0;
 }
 
 int AddStudent(StudentP P, char Name[32], char Surname[32], int ID) {
@@ -153,11 +158,12 @@ int AddStudent(StudentP P, char Name[32], char Surname[32], int ID) {
 	strcpy(Q->firstName, Name);
 	strcpy(Q->lastName, Surname);
 	Q->idNumber = ID;
+	Q->Child = NULL;
 
 	while (P->Next != NULL && ((strcmp(P->Next->lastName, Q->lastName) < 0) || (strcmp(P->Next->lastName, Q->lastName) == 0 && strcmp(P->Next->firstName, Q->firstName) < 0))) {
 		P = P->Next;
 	}
-	
+
 	Q->Next = P->Next;
 	P->Next = Q;
 
@@ -165,85 +171,86 @@ int AddStudent(StudentP P, char Name[32], char Surname[32], int ID) {
 }
 
 int PrintList(StudentP P) {
-    SubjectP Q; 
-    
-    if (P == NULL)
-        printf("The list is empty.");
-    
-    else
-    {
-        while(P != NULL) {
-            printf("%s %s id:%d \n", P->lastName, P->firstName, P->idNumber);
-            Q = P->Child;
-            while(Q != NULL) {
-                printf("%s:%d\n", Q->subjectName, Q->grade);
-                
-                Q = Q->Next;
-                
-            }
-            printf("\n");         
-            P = P->Next;
-        }
-    }
-    
-    return 0;
+	SubjectP Q;
+
+	if (P == NULL)
+		printf("The list is empty.");
+
+	else
+	{
+		while (P != NULL) {
+			printf("%s %s id:%d \n", P->lastName, P->firstName, P->idNumber);
+			Q = P->Child;
+			while (Q != NULL) {
+				printf("%s:%d\n", Q->subjectName, Q->grade);
+
+				Q = Q->Next;
+
+			}
+			printf("\n");
+			P = P->Next;
+		}
+	}
+
+	return 0;
 }
 
 int AddGrades(StudentP P, int ID, int Grade, char SubjectName[32]) {
-    SubjectP Q = NULL;
-    Q = (SubjectP)malloc(sizeof(Subject));
-    
-    strcpy(Q->subjectName, SubjectName);
-    Q->grade = Grade;
-    
-    if (Q == NULL) {
-        printf("ERROR! Memory allocation failed.");
-        return -1;
-    }
-    
-    while(P->Next != NULL && P->idNumber != ID)
-        P = P->Next;
-        
-    if (P->idNumber == ID) {
-        Q->Next = P->Child;
-        P->Child = Q;
-    }
-    return 0;
+	SubjectP Q = NULL;
+	Q = (SubjectP)malloc(sizeof(Subject));
+
+	strcpy(Q->subjectName, SubjectName);
+	Q->grade = Grade;
+	//Q->Next = NULL;
+
+	if (Q == NULL) {
+		printf("ERROR! Memory allocation failed.");
+		return -1;
+	}
+
+	while (P->Next != NULL && P->idNumber != ID)
+		P = P->Next;
+
+	if (P->idNumber == ID) {
+		Q->Next = P->Child;
+		P->Child = Q;
+	}
+	return 0;
 }
 
 int CreateListPassedAllThree(StudentP P, StudentP Q) {
-    StudentP prev;
-    SubjectP R;
-    prev = P;
-    P = P->Next;
-    
-    while(P->Next != NULL) {
-        R = P->Child;
-        if((R != NULL) && (R->grade > 1)){
-            R = R->Next;
-            if((R != NULL) && (R->grade > 1)){
-                R = R->Next;
-                if((R != NULL) && (R->grade > 1)) {
-                    prev->Next = P->Next;
-                    P->Next = Q->Next;
-                    Q->Next = P;
-                    P = prev->Next;
-                }
-                else {
-                    prev = P;
-                    P = P->Next;
-                }
-            }
-            else {
-                prev = P;
-                P = P->Next;
-            }
-        }
-        else {
-            prev = P;
-            P = P->Next;
-        }
-    }
+	StudentP prev;
+	SubjectP R;
+	prev = P;
+	P = P->Next;
 
-    return 0;   
+	while (P->Next != NULL) {
+		R = P->Child;
+		if ((R != NULL) && (R->grade > 1)){
+			R = R->Next;
+			if ((R != NULL) && (R->grade > 1)){
+				R = R->Next;
+				if ((R != NULL) && (R->grade > 1)) {
+					prev->Next = P->Next;
+					P->Next = Q->Next;
+					Q->Next = P;
+					P = prev->Next;
+				}
+				else {
+					prev = P;
+					P = P->Next;
+				}
+			}
+			else {
+				prev = P;
+				P = P->Next;
+			}
+		}
+		else {
+			prev = P;
+			P = P->Next;
+		}
+	}
+
+	return 0;
 }
