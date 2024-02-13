@@ -5,7 +5,9 @@
 #include <string.h>
 #include <time.h>
 
-
+#define MIN_ID (100)
+#define MAX_ID (180)
+	
 typedef struct _date {
 	int day;
 	int month;
@@ -23,15 +25,15 @@ typedef struct _person {
 } Person;
 
 int InitializeHead(PersonP Head);
-int AddPerson(PersonP P, char Name[32], char Surname[32], int Day, int Month, int Year);
+int AddPerson(PersonP P, char Name[32], char Surname[32], int Day, int Month, int Year, int Id);
 //int AddDate(PersonP P, int Day, int Month, int Year);
 int PrintList(PersonP P);
 int RandomNum(int min, int max);
+int GenerateId(int id_used[81]);
+int CreateListMonthWithMostPeople(PersonP P, PersonP Q);
 
 int main()
 {
-	int MIN_ID = 100;
-	int MAX_ID = 180;
 	srand(time(NULL));			/* inicijalizacija rand generatora */
 	int id_used[81] = { 0 };    /* niz u kojem spremamo iskorištene ID-ove, služi za provjeru jedinstvenosti */
 
@@ -40,9 +42,17 @@ int main()
 	int Day = 0;
 	int Month = 0;
 	int Year = 0;
+	int Id = 0;
 	PersonP Head = NULL;
+	PersonP NewHead = NULL;
 	Head = (PersonP)malloc(sizeof(Person));
 	if (Head == NULL) {
+		printf("ERROR! Memory allocation failed");
+		return -1;
+	}
+	
+	NewHead = (PersonP)malloc(sizeof(Person));
+	if (NewHead == NULL) {
 		printf("ERROR! Memory allocation failed");
 		return -1;
 	}
@@ -61,7 +71,8 @@ int main()
 	int nOsoba = 0;
 	while (!feof(fp)) {
 		fscanf(fp, "%s %s %d.%d.%d.\n", Surname, Name, &Day, &Month, &Year);
-		AddPerson(Head, Name, Surname, Day, Month, Year);
+		Id = GenerateId(id_used);
+		AddPerson(Head, Name, Surname, Day, Month, Year, Id);
 		nOsoba++;
 	}
 	
@@ -86,15 +97,25 @@ int main()
 
 	
 	//test
-	for (int i = 0; i <= 100; i++){
+	/*for (int i = 0; i <= 100; i++){
 		int n = RandomNum(MIN_ID, MAX_ID);
 		while (id_used[n-100])
 			n = RandomNum(MIN_ID, MAX_ID);
 		id_used[n-100] = 1;
-	}
+	}*/
 
 
 	PrintList(Head->Next);
+
+    CreateListMonthWithMostPeople(Head, NewHead);
+    
+    printf("\n");
+    printf("\nPeople not born in the month with most births\n");
+    PrintList(Head->Next);
+
+    printf("\n");    
+    printf("\nPeople born in the month with most births\n");
+    PrintList(NewHead->Next);
 
 	return 0;
 }
@@ -109,7 +130,16 @@ int InitializeHead(PersonP Head) {
 	return 0;
 }
 
-int AddPerson(PersonP P, char Name[32], char Surname[32], int Day, int Month, int Year) {
+int GenerateId(int id_used[81]){
+    int n = (rand() % (MAX_ID - MIN_ID + 1)) + MIN_ID;
+    while (id_used[n-100])
+        n = (rand() % (MAX_ID - MIN_ID + 1)) + MIN_ID;
+    id_used[n-100] = 1;
+    
+    return n;
+}
+
+int AddPerson(PersonP P, char Name[32], char Surname[32], int Day, int Month, int Year, int Id) {
 	PersonP Q = NULL;
 	Q = (PersonP)malloc(sizeof(Person));
 
@@ -122,7 +152,7 @@ int AddPerson(PersonP P, char Name[32], char Surname[32], int Day, int Month, in
 
 	strcpy(Q->lastName, Surname);
 	strcpy(Q->firstName, Name);
-	Q->idNumber = 0;
+	Q->idNumber = Id;
 	Q->birthDate.day = Day;
 	Q->birthDate.month = Month;
 	Q->birthDate.year = Year;
@@ -171,7 +201,7 @@ int PrintList(PersonP P) {
 		printf("List is empty");
 	else {
 		while (P != NULL) {
-			printf("\n%s %s %d.%d.%d.", P->lastName, P->firstName, P->birthDate.day, P->birthDate.month, P->birthDate.year);
+			printf("\n%s %s %d.%d.%d. Id:%d", P->lastName, P->firstName, P->birthDate.day, P->birthDate.month, P->birthDate.year, P->idNumber);
 
 			P = P->Next;
 		}
@@ -192,4 +222,44 @@ int RandomNum(int min, int max)
 	}
 
 	return rand_num % n + min;
+}
+
+int CreateListMonthWithMostPeople(PersonP P, PersonP Q) {
+    int MonthWithMax = 0;
+    int MaxNumber = 0;
+    int StudentsPerMonth[12] = { 0 };
+    int i = 0;
+    PersonP R = P;
+    PersonP prev = P;
+    
+    P = P->Next;
+    
+    while(R->Next != NULL) {
+        StudentsPerMonth[R->Next->birthDate.month - 1] += 1;
+    
+        R = R->Next;
+    }
+    
+    for(i = 0;i < 12; i++) {
+        if (MaxNumber < StudentsPerMonth[i]) {
+            MaxNumber = StudentsPerMonth[i];
+            MonthWithMax = i + 1;
+        }
+    }
+    
+    while(P != NULL) {
+        if (P->birthDate.month == MonthWithMax) {
+            prev->Next = P->Next;
+            P->Next = Q->Next;
+            Q->Next = P;
+            P = prev ->Next;
+        }
+        else {
+            prev = P;
+            P = P->Next;
+        }
+        
+    }
+
+    return 0;
 }
