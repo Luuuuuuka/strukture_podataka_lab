@@ -31,7 +31,7 @@ int RandomNum(int min, int max);
 int main()
 {
 	int MIN_ID = 100;
-	int MAX_ID = 105;
+	int MAX_ID = 180;
 	srand(time(NULL));			/* inicijalizacija rand generatora */
 	int id_used[81] = { 0 };    /* niz u kojem spremamo iskorištene ID-ove, služi za provjeru jedinstvenosti */
 
