@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
+
 
 typedef struct _date {
 	int day;
@@ -24,9 +26,15 @@ int InitializeHead(PersonP Head);
 int AddPerson(PersonP P, char Name[32], char Surname[32], int Day, int Month, int Year);
 //int AddDate(PersonP P, int Day, int Month, int Year);
 int PrintList(PersonP P);
+int RandomNum(int min, int max);
 
 int main()
 {
+	int MIN_ID = 100;
+	int MAX_ID = 105;
+	srand(time(NULL));			/* inicijalizacija rand generatora */
+	int id_used[81] = { 0 };    /* niz u kojem spremamo iskorištene ID-ove, služi za provjeru jedinstvenosti */
+
 	char Name[32];
 	char Surname[32];
 	int Day = 0;
@@ -50,9 +58,18 @@ int main()
 	InitializeHead(Head);
 
 	//OK ali samo ako ima \n, inače čita "šporki" zadnji red
+	int nOsoba = 0;
 	while (!feof(fp)) {
 		fscanf(fp, "%s %s %d.%d.%d.\n", Surname, Name, &Day, &Month, &Year);
 		AddPerson(Head, Name, Surname, Day, Month, Year);
+		nOsoba++;
+	}
+	
+	//provjera br. osoba s obzirom na borj jedistvenih ID-ova koje generiramo
+	if (nOsoba > MAX_ID - MIN_ID + 1)
+	{
+		printf("ERROR! Number of persons exceeds possible number of unique IDs!");
+		return -1;
 	}
 
 	//ako nema \n onda treba dodat if
@@ -66,6 +83,16 @@ int main()
 	/*while (fscanf(fp, "%s %s %d.%d.%d.", Surname, Name, &Day, &Month, &Year)!=EOF) {
 		AddPerson(Head, Name, Surname, Day, Month, Year);
 	}*/
+
+	
+	//test
+	for (int i = 0; i <= 100; i++){
+		int n = RandomNum(MIN_ID, MAX_ID);
+		while (id_used[n-100])
+			n = RandomNum(MIN_ID, MAX_ID);
+		id_used[n-100] = 1;
+	}
+
 
 	PrintList(Head->Next);
 
