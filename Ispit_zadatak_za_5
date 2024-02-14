@@ -67,15 +67,15 @@ int main()
 	fclose(fp);
 
 	PrintList(Head->Next);
-	
+
 	printf("\n");
-	
+
 	printf("\nNew list\n");
-	
+
 	DeleteMonthWithMostBirths(Head);
-	
+
 	PrintList(Head->Next);
-	
+
 	//DeleteYear(Head);
 
 	return 0;
@@ -159,33 +159,6 @@ int AddDate(YearP P, char Surname[32], char Name[32], int Day, int Month, int Ye
 			Q_prev->Next = NewDate;
 		}
 
-		//OLD
-		/*if (P->Child->month < NewDate->month) {
-			NewDate->Next = P->Child->Next;
-			P->Child = NewDate;
-			}
-		else if ((P->Child->month == NewDate->month) && (P->Child->day < NewDate->day)) {
-			NewDate->Next = P->Child->Next;
-			P->Child = NewDate;	
-		}
-		else {
-
-			Q = P->Child;
-
-			while ((Q->Next != NULL) && (Q->Next->month < NewDate->month))
-				Q = Q->Next;
-			while ((Q->Next != NULL) && (Q->Next->month == NewDate->month) && (Q->Next->day < NewDate->day))
-				Q = Q->Next;
-
-			if (Q == P->Child) {
-				NewDate->Next = Q;
-				P->Child = NewDate;
-			}
-			else {
-				NewDate->Next = Q->Next;
-				Q->Next = NewDate;
-			}
-		}*/
 	}
 
 	return 0;
@@ -226,68 +199,69 @@ int DeleteDate(DateP P) {
 }
 
 int DeleteMonthWithMostBirths(YearP P) {
-    int i = 0;
-    int Max_number = 0;
-    int Month_with_Max = 0;
-    int Months[12] = { 0 };
-    DateP Q, temp_Q, prev_Q;
-    YearP R, prev_P, temp_P;
-    
-    R = P->Next;
-    
-    while(R != NULL) {
-        Q = R->Child;
-        
-        while(Q != NULL) {
-            Months[Q->month - 1] += 1;
-            
-            Q = Q->Next;
-        }
-        
-        R = R->Next;
-    }
-    
-    for(i = 0;i < 12;i++) {
-        if (Months[i] > Max_number) {
-            Max_number = Months[i];
-            Month_with_Max = i + 1;
-        }
-    }
-    
-    while(P != NULL) {
-        Q = P->Child;
-        
-        while(Q != NULL) {
-            if(Q->month = Month_with_Max) {
-                if (Q == P->Child) {
-                    temp_Q = Q;
-                    P->Child = Q->Next;
-                    Q = Q->Next;
-                    free(temp_Q);
-                }
-                else {
-                    temp_Q = Q;
-                    prev_Q->Next = Q->Next;
-                    free(temp_Q);
-                    Q = Q->Next;
-                }
-                
-            }
-            else {
-                prev_Q = Q;
-                Q = Q->Next;
-            }
-        }
-        
-        if (P->Child == NULL) {
-            temp_P = P;
-            P = P->Next;
-            free(temp_P);
-        }
-        else
-            P = P->Next;
-        
-        
-    }
-    return 0;
+	int i = 0;
+	int Max_number = 0;
+	int Month_with_Max = 0;
+	int Months[12] = { 0 };
+	DateP Q, temp_Q, prev_Q;
+	YearP R, prev_P, temp_P;
+
+	R = P->Next;
+
+	while (R != NULL) {
+		Q = R->Child;
+
+		while (Q != NULL) {
+			Months[Q->month - 1] += 1;
+
+			Q = Q->Next;
+		}
+
+		R = R->Next;
+	}
+
+	for (i = 0; i < 12; i++) {
+		if (Months[i] > Max_number) {
+			Max_number = Months[i];
+			Month_with_Max = i + 1;
+		}
+	}
+
+	P = P->Next;
+	while (P != NULL) {
+		Q = P->Child;
+
+		while (Q != NULL) {
+			if (Q->month == Month_with_Max) {
+				if (Q == P->Child) {
+					temp_Q = Q;
+					P->Child = Q->Next;
+					Q = Q->Next;
+					free(temp_Q);
+				}
+				else {
+					temp_Q = Q;
+					prev_Q->Next = Q->Next;
+					Q = Q->Next;
+					free(temp_Q);				
+				}
+
+			}
+			else {
+				prev_Q = Q;
+				Q = Q->Next;
+			}
+		}
+
+		if (P->Child == NULL) {
+			temp_P = P;
+			P = P->Next;
+			free(temp_P);
+		}
+		else
+			P = P->Next;
+
+
+	}
+	return 0;
 }
